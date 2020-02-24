@@ -83,7 +83,7 @@ public:
 
     if (!kth_stage_loader_->loadDirectory(dataset_dir_))
     {
-      ROS_ERROR("no valid floorplan");
+      ROS_ERROR_STREAM("no valid floorplan in dir: '" << dataset_dir_ << "' .");
     }
 
     groundtruth_odom_subscriber_ = private_nh_.subscribe("/base_pose_ground_truth", 5, &KTHStageNode::groundtruthOdomCallback, this);

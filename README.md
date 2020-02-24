@@ -1,5 +1,9 @@
 # Nodes
 ## kth_stage_node
+### Download data from here
+
+http://www.csc.kth.se/~aydemir/floorplans.html
+
 ### Parameters
 1. dataset_dir: directory containing .xml files of KTH dataset
 

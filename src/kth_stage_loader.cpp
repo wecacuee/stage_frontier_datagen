@@ -30,7 +30,9 @@ int KTHStageLoader::loadDirectory(std::string dataset_dir)
 //        && !graph.m_edges.empty()
         && graph.m_property->floorname.find("conflicted") == std::string::npos
         && graph.m_property->centroid.x != -1
-        && graph.m_property->centroid.y != -1)
+        && graph.m_property->centroid.y != -1
+        && graph.m_property->real_distance != -1
+        && graph.m_property->pixel_distance != -1)
     {
       // The BGL_FORALL_VERTICES macro doesn't work inside a thread, so do these in constructor before threading
       cv::Mat map = floorplan::GraphFileOperations::getGraphLayout(graph, MAP_RESOLUTION, MAP_SIZE);
@@ -48,7 +50,10 @@ int KTHStageLoader::loadDirectory(std::string dataset_dir)
 
 std::vector<cv::Point> KTHStageLoader::getUnobstructedPoints(const floorplanGraph &graph)
 {
+  assert(graph.m_property->real_distance != -1);
+  assert(graph.m_property->pixel_distance != -1);
   cv::Mat floorplan_map = floorplan::GraphFileOperations::getGraphLayout(graph, MAP_RESOLUTION, MAP_SIZE);
+  assert(floorplan_map.data);
 
   // inflate the map (so that the robot isn't very close to the obstacles)
   const int inflation_size = static_cast<int>(std::round(OBSTACLE_INFLATION_SIZE / MAP_RESOLUTION));
