@@ -212,7 +212,8 @@ protected:
   ros::Publisher vel_pub_;
   ros::Publisher exploration_plan_pub_;
   ros::NodeHandle nh_;
-  tf::TransformListener tfl_;
+  tf2_ros::Buffer tfb_;
+  tf2_ros::TransformListener tfl_;
 
   ros::Timer exploration_plan_generation_timer_;
   ros::Timer cmd_vel_generator_timer_;

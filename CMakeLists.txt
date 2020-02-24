@@ -23,6 +23,7 @@ find_package(catkin REQUIRED COMPONENTS
   std_srvs
   tf
   tf2
+  tf2_geometry_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -183,6 +184,8 @@ target_link_libraries(kth_stage_node
   ${OpenCV_LIBS}
   floorplan
   ${JSONCPP_LIBRARIES}
+  jsoncpp_lib
+  ${tf2_geometry_msgs_LIBRARIES}
 )
 
 #############

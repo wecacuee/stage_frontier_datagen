@@ -36,6 +36,7 @@
 #include <stage_frontier_datagen/simple_exploration_controller.h>
 #include <thread>
 #include <cmath>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 namespace stage_frontier_datagen
 {
@@ -53,9 +54,11 @@ SimpleExplorationController::SimpleExplorationController(
     is_plan_finished_callback_running_(false),
     planner_status_(false),
     last_planner_status_(false),
-    plan_number_(0)
+    plan_number_(0),
+    tfb_(),
+    tfl_(tfb_)
 {
-  path_follower_.initialize(&tfl_);
+  path_follower_.initialize(&tfb_);
   // TODO: update exploration plan a few waypoints before your previous plan will finish
 //  exploration_plan_generation_timer_ = nh_.createTimer(ros::Duration(1.0),
 //                                                       &SimpleExplorationController::timerPlanExploration, this, false);
@@ -403,19 +406,20 @@ geometry_msgs::PoseStamped SimpleExplorationController::getRobotPoseAtPlanEnd() 
 
 bool SimpleExplorationController::getRobotPose(geometry_msgs::PoseStamped &pose)
 {
-  tf::Stamped<tf::Pose> robot_pose_tf;
+  geometry_msgs::PoseStamped robot_pose_tf;
   bool robot_pose_status = costmap_2d_ros_->getRobotPose(robot_pose_tf);
 
-  if (!robot_pose_status || robot_pose_tf.getRotation().length2() < 1e-5)
+  if (!robot_pose_status)
   {
     ROS_ERROR("Failed to get robot pose from costmap");
     return false;
   }
 
-  tf::poseStampedTFToMsg(robot_pose_tf, pose);
+  pose = robot_pose_tf;
 
-  tf::Quaternion orientation;
-  tf::quaternionMsgToTF(pose.pose.orientation, orientation);
+  tf2::Stamped<tf2::Transform> transform;
+  tf2::fromMsg(robot_pose_tf, transform);
+  tf2::Quaternion orientation = transform.getRotation();
   if (orientation.length2() < 1e-5)
   {
     ROS_ERROR("poseStampedTFToMsg incorrect");
@@ -425,7 +429,7 @@ bool SimpleExplorationController::getRobotPose(geometry_msgs::PoseStamped &pose)
 
 void SimpleExplorationController::initializeCostmap()
 {
-  costmap_2d_ros_.reset(new hector_exploration_planner::CustomCostmap2DROS("global_costmap", tfl_, false));
+  costmap_2d_ros_.reset(new hector_exploration_planner::CustomCostmap2DROS("global_costmap", tfb_, false));
 
   boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(costmap_2d_ros_->getCostmap()->getMutex()));
   for (const auto &layer: *(costmap_2d_ros_->getLayeredCostmap()->getPlugins()))
